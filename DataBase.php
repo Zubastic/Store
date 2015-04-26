@@ -225,6 +225,10 @@ class DataBaseWorker {
         return $order;
     }
 
+    public function deleteOrder($login, $num) {
+        //TODO: проверить привелегии при исполнении (юзер или админ)
+    }
+    
     public function getOrders($login) {
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);

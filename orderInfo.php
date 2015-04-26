@@ -18,7 +18,13 @@
     $dataBase = DBWorkerFabric::GetDataBaseWorker();
     // Номер заказа для отображения.
     $orderNum = htmlspecialchars($_GET['orderNum']);
-    
+    $orderDelete = htmlspecialchars($_GET['$orderDelete']);
+    if ($orderDelete != "" && $user->isAdmin()) {
+        header('Refresh: 3; URL=../admin.php');
+        $order = $dataBase->deleteOrder($user->getLogin(), $orderDelete);
+        echo 'Заказ ' + $orderDelete + " удален!";
+        exit;
+    }
     
     // Если 0 - корзина.
     if ($orderNum == "" || $orderNum == 0) {
