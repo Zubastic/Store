@@ -145,6 +145,10 @@ class DataBaseWorker implements IDataBaseWorker {
         
     }
 
+    public function deleteOrder($login, $num) {
+        //TODO: проверить привелегии при исполнении (юзер или админ)
+    }
+    
     public function getOrders($login) {
         
     }
