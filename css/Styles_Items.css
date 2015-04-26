@@ -1,0 +1,130 @@
+
+
+
+.ItemsMenu {
+            width: 80%; 
+            float: left;
+            display: block;
+            
+           
+}
+
+.ItemList {
+        margin: 0pt 0pt 15pt 0pt;
+        padding: 10pt 10pt 10pt 10pt;
+        background-color: #E0EAEB;
+        float: left;
+        width: 100%;;
+        min-height: 10%;
+        list-style: none;
+    }
+
+.ItemImg {
+        float: left;
+        width: 20%;;
+        background-color: white;
+        min-height: 10%;        
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+.ItemImg1 {
+        float: left;
+        width: 20%;;
+        background-color: green;
+        min-height: 10%;        
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .Info {
+       text-align: left;
+       width: 50%;  
+       float: left;
+       margin-left: 0px;
+      display: inline-block;
+      padding-top: 20px; 
+    }     
+    .BuyerMenu {
+        width: 25%;
+        float: left;
+        display: inline-block;
+        border: 1px solid #ECEDEE;
+        border-radius: 15px;
+        box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.05) inset;
+    }
+    .priceContainer {
+        background: linear-gradient(to bottom, #FFF 0%, #FDF0F3 70%) repeat scroll 0% 0% transparent;
+        border: 3px solid #FFF;
+        border-radius: 10px;
+        box-shadow: 0px 5px 13px 0px rgba(63, 69, 75, 0.2);
+        margin: 11px auto 0px;
+        text-align: center;
+        width: 88%;
+    }
+    
+    .price {
+        text-shadow: 0px 1px 0px #000;
+        font-size: 22px;
+        font-family: Helvetica,Arial,sans-serif;
+        letter-spacing: 3px;
+    }
+    
+    .addBasket {
+        width: 90%;
+        height: 27px;
+        display: block;
+        cursor: pointer;
+        margin: 11px auto 0px;
+        background: linear-gradient(to bottom, #FFF 0%, #B03060 70%) repeat scroll 0% 0% transparent;
+    }
+     
+    .ButtonBasket {
+        color: #FFF;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 25px;
+        padding: 0px;
+        text-shadow: 0px 1px 0px #000;
+        white-space: nowrap;
+        
+        }
+        
+       
+        
+        .textInfo {
+            color: #FFF;
+        font-size: 14px;
+        font-weight: bold;
+        line-height: 25px;
+        padding: 0px;
+        text-shadow: 0px 1px 0px #000;
+        white-space: nowrap;
+            text-decoration: none;
+        }
+        
+       
+        
+        
+        .availableButton {
+        background: linear-gradient(to bottom, #B0E0E6 0%, #DB7093 70%) repeat scroll 0% 0% transparent;
+        border: 3px solid #FFF;
+        border-radius: 10px;
+        box-shadow: 0px 5px 13px 0px rgba(63, 69, 75, 0.2);
+        margin: 11px auto 0px;
+        text-align: center;
+        width: 88%;
+    }
+    
+    .availabilityText {
+        color: #FFF;
+        text-shadow: 0px 1px 0px #000;
+        font-size: 14px;
+        letter-spacing: 2px;
+        font-weight: bold;
+    }
+    
+    .plusGoods {
+        text-align: center;
+        width: 30px;
+    }
