@@ -60,10 +60,10 @@
                 }
             
             
-                $orders = $db->getOrders($user->getLogin());
+                $orders = $db->getAllOrders($user->getLogin());
                 foreach ($orders as $order) {
-                    printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a></li>', 
-                            $order->Number, $order->Number, $order->Date);
+                    printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a> <a href="orderInfo.php?orderDelete=%s">Delete</a></li>', 
+                            $order->Number, $order->Number, $order->Date, $order->Number);
                 }
             ?>
         </ul>
