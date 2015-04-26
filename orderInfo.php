@@ -26,7 +26,7 @@
         $pageName = "Корзина";
     } else {
         $pageName = "Заказ №" . $orderNum;
-        $order = $dataBase->getOrder($user->getLogin(), $orderNum);
+        $order = $dataBase->getOrder($orderNum);
         if (!is_null($order)) {
             $items = $order->ItemList;
         }

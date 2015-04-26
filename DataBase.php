@@ -29,16 +29,17 @@ interface IDataBaseWorker {
     function addItemToCart($login, $itemId);    // void
     function findItems($searchQuery);           // Item[]
     function getItem($id);                      // Item
+    function removeItem($id);                   // void
     function getCart($login);                   // Item[]
     function clearCart($login);                 // void
+    function getAllOrders();                    // Orders[]
     function getOrders($login);                 // Orders[]
-    function addOrder($login, $order);          // void
+    function addOrder($order);          // void
     
     // Оформить заказ из корзины (Удаляет из корзины и помещает в заказы).
     function checkoutCart($login);              // void
     function getOrder($login, $num);            // Order
 }
-
 
 abstract class DBWorkerFabric {
     private static $_dbWorker = null;
@@ -52,7 +53,7 @@ abstract class DBWorkerFabric {
     }
 }
 
-class DataBaseWorker implements IDataBaseWorker {
+class DataBaseWorker {
     private $database = null;
 
     public function __construct() {
@@ -66,7 +67,12 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 
     public function addItemToCart($login, $itemId) {
+        $slogin = htmlspecialchars($login);
+        $sitemId = htmlspecialchars($itemId);
         
+        $usrId = $this->findUser($slogin);
+        
+        $this->database->exec("INSERT INTO CustomerCart (Acc_Index, Item_Index, Quantity) VALUES ('$usrId', '$sitemId','1')");
     }
 
     public function addOrder($login, $order) {
@@ -98,7 +104,11 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 
     public function addUser($login, $pwd) {
+        $slogin = htmlspecialchars($login);
+        $spwd = htmlspecialchars($pwd);
         
+        // TODO: Хэшировать.
+        $this->database->exec("INSERT INTO Accounts (Login, Password) VALUES ('$slogin','$spwd')");
     }
 
     public function checkUser($login, $pwd) {
@@ -121,7 +131,10 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 
     public function clearCart($login) {
+        $slogin = htmlspecialchars($login);
+        $id = $this->findUser($slogin);
         
+        $this->database->exec("CALL CLEAR_CART($id)");
     }
     
     // Возвращает массив Item-ов.
@@ -158,7 +171,6 @@ class DataBaseWorker implements IDataBaseWorker {
         }
     }
 
-    
     public function getCart($login) {
         // TODO: Учитывать количество.
         $slogin = htmlspecialchars($login);
@@ -186,29 +198,96 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 
     public function getItem($id) {
+        $sid = htmlspecialchars($id);
+        
+        $info = $this->database->query("CALL GET_ITEM($sid)");
+        $itemArr = $info->fetchAll()[0];
+        
+        return new Item($itemArr);
         
     }
 
-    public function getOrder($login, $num) {
+    public function getOrder($num) {
+        echo 'fr43t5yhujityrterwwqrtyujytr';
+        $snum = htmlspecialchars($num);
         
+        $info = $this->database->query("CALL GET_ORDER($snum)");
+        
+        $order = new Order();
+        $order->Number = $snum;
+        $order->ItemList = array();
+        
+        foreach ($info->fetchAll()[0] as $itemId) {
+            // TODO: Убрать.
+            print_r($itemId);
+            $order->ItemList[] = $this->getItem($itemId);
+        }
+        return $order;
     }
 
     public function getOrders($login) {
+        $slogin = htmlspecialchars($login);
+        $id = $this->findUser($slogin);
         
+        $info = $this->database->query("CALL GET_ORDERS($id)");
+        $orders = array();
+        
+        foreach ($info->fetchAll()[0] as $orderNum) {
+            $orders[] = $this->getOrder($orderNum);
+        }
+        return $orders;
     }
 
-    public function getAllOrders($login) {
+    public function getAllOrders() {
+        $info = $this->database->query("SELECT Ord_Number FROM Orders");
+        $orders = array();
         
+        foreach ($info->fetchAll()[0] as $orderNum) {
+            $orders[] = $this->getOrder($orderNum);
+        }
+        return $orders;
     }
     
     public function getUserInfo($login) {
+        $slogin = htmlspecialchars($login);
+        $id = $this->findUser($slogin);
         
+        $query = $this->database->query("CALL GET_USER_INFO($id)");
+        $info = $query->fetchAll();
+        
+        $userInfo = new UserInfo($info[0]);
+        
+        $addr = array();
+        foreach ($info as $value) {
+            $a = new Address();
+            $a->Country = $value['Country'];
+            $a->City = $value['City'];
+            $a->Addr = $value['Address'];
+            $addr[] = $a;
+        }
+        
+        $contacts = array();
+        foreach ($info as $value) {
+            $c = new Contact();
+            $c->Type = $value['ContactType'];
+            $c->Data = $value['Data'];
+            $contacts[] = $c;
+        }
+        
+        $userInfo->Address = $addr;
+        $userInfo->Contacts = $contacts;
+        
+        return $userInfo;
     }
 
     public function setUserInfo($login, $userInfo) {
         
     }
 
+    public function removeItem($id) {
+        
+    }
+    
     
     // TODO: Использовать стандартную функцию.
     private function itemsArrayIntrsect($arr1, $arr2) {
@@ -224,211 +303,4 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 }
 
-
-// Класс для фейкового набора данных.
-abstract class Data {
-    public static $goods = array(
-        array(name => "Броня 1", id => "123", imgSrc => "img/armor_1.png", price => 1234, count => 5,
-            description => "Броня норм", category => "Armor"),
-        
-        array(name => "Броня 2", id => "1234", imgSrc => "img/armor_2.png", count => 10,
-        price => 431, description => "Броня д", category => "Armor"),
-        
-        array(name => "Лук", id => "125", imgSrc => "img/bow.png", count => 35,
-        price => 52, description => "лук как лук", category => "Bow"),
-        
-        array(name => "Криворукий меч", id => "1", imgSrc => "img/t_blade.png", count => 2,
-        price => 1234, description => "У воинов из Хаммерфелла кривые мечи... Кривые. Мечи.", category => "Weapon"),
-        
-        array(name => "Однорукий меч", id => "124", imgSrc => "img/o_blade.png", count => 10,
-        price => 431, description => "лук как меч", category => "Weapon"),
-        
-        array(name => "Щит", id => "126", imgSrc => "img/shield.png", count => 53,
-        price => 3433, description => "холи", category => "Shield")
-    );
-    
-    public static $categories = array(array(name => "Луки и стрелы", ref => "index.php?items_category=Bow"),
-                                   array(name => "Броня", ref => "index.php?items_category=Armor"),
-                                   array(name => "Щиты", ref => "index.php?items_category=Shield"),
-                                   array(name => "Оружие", ref => "index.php?items_category=Weapon"));
-    
-    
-    
-    public static $users = array(
-        array(login => "Nagibator2004",
-            name => "Ванечка", midname => "Иванович", surname => "Пупкин",
-            address => "г.Мухосранск, ул.Ленина, д.3, кв.2",
-            password => "1234", privileges => 1,
-            contacts => array(array(type => 0, data => "ololo@dew.com"), array(type => 1, data => "31256543"),
-                array(type => 1, data => "123489234"),array(type => 0, data => "nAgibAt0rR2004@dota.com"))),
-        array(login => "STRIKER_2003", name => "Петр", midname => "Евгеньевич", surname => "Иванов",
-            address => "NY, Манхэттн",
-            password => "4321", privileges => 1,
-            contacts => array(array(type => "Phone", data => "123456789"), array(type => 0, data => "STRIKER_2OO3@cstrike.ru")))
-        );
-    
-    
-    public static $orders = array(
-            array(number => 1, user => "Nagibator2004", itemList => array(125,124,123), date => "21.03.2015"), 
-            array(number => 4, user => "Nagibator2004", itemList => array(126,124,123), date => "22.03.2015"), 
-            array(number => 2, user => "STRIKER_2003", itemList => array(1234,125,126), date => "23.04.2015")
-        );
-}
-
-
-
-
-class FakeDataBaseWorker implements IDataBaseWorker {
-    
-    
-    
-    public function addUser($login, $pwd) {
-        if ($this->findUser($login)) {
-            return false;
-        }
-        Data::$users[] = array(login => $login, password => $pwd);
-        return true;
-    }
-
-    public function checkUser($login, $pwd) {
-        foreach (Data::$users as $user) {
-            if ($user['login'] == $login && 
-                $user['password'] == $pwd) 
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function findUser($login) {
-        foreach (Data::$users as $usr) {
-            if ($usr['login'] == $login) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getCategories() {
-        return Data::$categories;
-    }
-
-    public function getUserInfo($login) {
-        foreach (Data::$users as $usr) {
-            if ($usr['login'] == $login) {
-                return new UserInfo($usr);
-            }
-        }
-        return null;
-    }
-
-    public function setUserInfo($login, $userInfo) {
-        Data::$users[0]['login'] = $login;
-        Data::$users[0]['userInfo'] = $userInfo;
-    }
-    
-    public function getCart($login) {
-        $q = new SearchQuery();
-        $q->Contains = "и";
-        $high = $this->findItems($q);
-        return $high;
-    }
-
-    public function getOrder($login, $num) {
-        foreach ($this->getOrders($login) as $order) {
-            if ($order->Number == $num) {
-                return $order;
-            }
-        }
-        return null;
-    }
-
-    public function getOrders($login) {
-        $orderList = array();
-        foreach (Data::$orders as $order) {
-            if ($order['user'] == $login) {
-                $orderList[] = new Order($order);
-            }
-        }
-        return $orderList;
-    }
-
-    public function addItemToCart($login, $itemId) {
-        // TODO: Реализовать.        
-    }
-
-    public function getItem($id) {
-        foreach (Data::$goods as $item) {
-            if ($item['id'] == $id) {
-                return new Item($item);
-            }
-        }
-        return null;
-    }
-
-    public function findItems($searchQuery) {
-        
-        $itemsByCategory = array();
-        
-        if ($searchQuery->CategoryName != "") {
-            foreach (Data::$goods as $item) {
-                if ($item['category'] == $searchQuery->CategoryName) {
-                    $itemsByCategory[] = new Item($item);
-                }
-            }
-        } else {
-            foreach (Data::$goods as $value) {
-                $itemsByCategory[] = new Item($value);
-            }
-        }
-        
-        
-        $itemsByContained = array();
-        
-        if ($searchQuery->Contains != "") {
-            $queryName = mb_convert_case($searchQuery->Contains, MB_CASE_LOWER, "UTF-8");
-        
-            foreach (Data::$goods as $item) {
-                if (strpos(mb_convert_case($item['name'], MB_CASE_LOWER, "UTF-8"), $queryName) !== false) {
-                    $itemsByContained[] = new Item($item);
-                }
-            }
-        } else {
-            foreach (Data::$goods as $value) {
-                $itemsByContained[] = new Item($value);
-            }
-        }
-        
-        return $this->itemsArrayIntrsect($itemsByCategory, $itemsByContained);
-        
-    }
-    
-    // TODO: Использовать стандартную функцию.
-    private function itemsArrayIntrsect($arr1, $arr2) {
-        $result = array();
-        foreach ($arr1 as $item1) {
-            foreach ($arr2 as $item2) {
-                if ($item1->Id === $item2->Id) {
-                    $result[] = $item1;
-                }
-            }
-        }
-            return $result;
-    }
-
-    public function clearCart($login) {
-        
-    }
-
-    public function addOrder($login, $order) {
-
-    }
-
-    public function checkoutCart($login) {
-        $this->addOrder($login, $this->getCart($login));
-        $this->clearCart($login);
-    }
-
-}
 ?>

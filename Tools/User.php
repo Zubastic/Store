@@ -62,6 +62,12 @@ class User {
     }
 }
 
+class Address {
+    public $Country = "";
+    public $City = "";
+    public $Addr = "";
+    public $AdditionalInfo = "";
+}
 
 // TODO: Константы.
 abstract class Privileges {
@@ -91,24 +97,22 @@ class Contact {
 // TODO: Вспомнить, чего еще добавить.
 class UserInfo {
     public function __construct($array) {
-        $this->Login = $array['login'];
-        $this->Name = $array['name'];
-        $this->MidName = $array['midname'];
-        $this->Surname = $array['surname'];
-        $this->Address = $array['address'];
+        $this->Name = $array['First_Name'];
+        $this->MidName = $array['Patronym'];
+        $this->Surname = $array['Last_Name'];
+        //$this->Address = new Address($array['address']);
         $this->Privileges = $array['privileges'];
+        /*
         foreach ($array['contacts'] as $contact) {
             $this->Contacts[] = new Contact($contact['type'], $contact['data']);
         }
+         */
     }
 
-    
-    
-    public $Login = "";         // str
     public $Name = "";          // str
     public $MidName = "";       // str
     public $Surname = "";       // str
-    public $Address = "";       // str
+    public $Address = array();  // Address[]
     public $Contacts = array(); // Contact[]
     public $Privileges = 0;     // Privileges
 }
