@@ -56,6 +56,19 @@ abstract class DBWorkerFabric {
 class DataBaseWorker {
     private $database = null;
 
+    private function _getDB() {
+        unset($this->database);
+        
+        include('db.conf.php');
+        try {
+            $this->database = new PDO("$dbtype:host=$dbhost;dbname=$dbname", $dbuser, $dbpassword);
+            $this->database->exec("SET NAMES 'utf8'");
+            return $dbase;
+        } catch (PDOException $ex) {
+            echo $ex->getMessage();
+        }
+    }
+
     public function __construct() {
         include('db.conf.php');
         try {
@@ -67,15 +80,18 @@ class DataBaseWorker {
     }
 
     public function addItemToCart($login, $itemId) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $sitemId = htmlspecialchars($itemId);
         
         $usrId = $this->findUser($slogin);
-        
         $this->database->exec("INSERT INTO CustomerCart (Acc_Index, Item_Index, Quantity) VALUES ('$usrId', '$sitemId','1')");
+        $this->_getDB();
     }
 
     public function addOrder($login, $order) {
+        $this->_getDB();
         
         $slogin = htmlspecialchars($login);
 
@@ -100,25 +116,35 @@ class DataBaseWorker {
             }
         } catch (PDOException $ex) {
             throw $ex;
+        } finally {
+            $this->_getDB();
         }
     }
 
     public function addUser($login, $pwd) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $spwd = htmlspecialchars($pwd);
         
         // TODO: Хэшировать.
         $this->database->exec("INSERT INTO Accounts (Login, Password) VALUES ('$slogin','$spwd')");
+        $this->_getDB();
     }
 
     public function checkUser($login, $pwd) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $spwd = htmlspecialchars($pwd);
         $info = $this->database->query("CALL CHECK_USER('$slogin', '$spwd')");
+        $this->_getDB();
         return $info->rowCount() > 0;
     }
 
     public function checkoutCart($login) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         
         $order = new Order();
@@ -128,17 +154,23 @@ class DataBaseWorker {
         
         $this->addOrder($slogin, $order);
         $this->clearCart($slogin);
+        $this->_getDB();
     }
 
     public function clearCart($login) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
         
         $this->database->exec("CALL CLEAR_CART($id)");
+        $this->_getDB();
     }
     
     // Возвращает массив Item-ов.
     public function findItems($searchQuery) {
+        $this->_getDB();
+        
         if (is_null($searchQuery)) {
             return array();
         }
@@ -158,12 +190,16 @@ class DataBaseWorker {
             $items[] = new Item($itemArr);
         }
         
+        $this->_getDB();
         return $items;
     }
 
     public function findUser($login) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $info = $this->database->query("CALL FIND_USER('$slogin')");
+        $this->_getDB();
         if ($info->rowCount() > 0) {
             return $info->fetchAll()[0]['Acc_Index'];
         } else {
@@ -172,6 +208,8 @@ class DataBaseWorker {
     }
 
     public function getCart($login) {
+        $this->_getDB();
+        
         // TODO: Учитывать количество.
         $slogin = htmlspecialchars($login);
         $info = $this->database->query("CALL GET_CART('$slogin')");
@@ -184,75 +222,94 @@ class DataBaseWorker {
             $items[] = $item;
         }
         
+        $this->_getDB();
         return $items;
     }
 
     // Возвращает массив имен категорий.
     public function getCategories() {
+        $this->_getDB();
+        
         $info = $this->database->query("CALL GET_CATEGORIES()");
         
         for ($i = 0; $i < $info->rowCount(); $i++) {
             $result[] = $info->fetchColumn();
         }
+        $this->_getDB();
         return $result;
     }
 
     public function getItem($id) {
+        $this->_getDB();
+        
         $sid = htmlspecialchars($id);
         
         $info = $this->database->query("CALL GET_ITEM($sid)");
         $itemArr = $info->fetchAll()[0];
         
+        $this->_getDB();
         return new Item($itemArr);
         
     }
 
     public function getOrder($num) {
-        echo 'fr43t5yhujityrterwwqrtyujytr';
+        $this->_getDB();
         $snum = htmlspecialchars($num);
         
-        $info = $this->database->query("CALL GET_ORDER($snum)");
+        
+        $info = $this->database->query("CALL GET_ORDER($num)");
+        //print_r($info);
+        
         
         $order = new Order();
         $order->Number = $snum;
         $order->ItemList = array();
         
-        foreach ($info->fetchAll()[0] as $itemId) {
-            // TODO: Убрать.
-            print_r($itemId);
-            $order->ItemList[] = $this->getItem($itemId);
+        $tmp = $info->fetchAll();
+        foreach ($tmp as $item) {
+            $order->ItemList[] = $this->getItem($item['Goods_Index']);
         }
+        
+        $this->_getDB();
         return $order;
     }
 
-    public function deleteOrder($login, $num) {
-        //TODO: проверить привелегии при исполнении (юзер или админ)
-    }
+
     
     public function getOrders($login) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
-        
         $info = $this->database->query("CALL GET_ORDERS($id)");
-        $orders = array();
         
-        foreach ($info->fetchAll()[0] as $orderNum) {
-            $orders[] = $this->getOrder($orderNum);
+        $orders = array();
+        $tmp = $info->fetchAll();
+        
+        foreach ($tmp as $orderNum) {
+            //print_r($orderNum);
+            $orders[] = $this->getOrder($orderNum['Ord_Number']);
         }
+        $this->_getDB();
         return $orders;
     }
 
     public function getAllOrders() {
+        $this->_getDB();
+        
         $info = $this->database->query("SELECT Ord_Number FROM Orders");
         $orders = array();
         
         foreach ($info->fetchAll()[0] as $orderNum) {
             $orders[] = $this->getOrder($orderNum);
         }
+        $this->_getDB();
         return $orders;
     }
     
     public function getUserInfo($login) {
+        $this->_getDB();
+        
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
         
@@ -281,6 +338,7 @@ class DataBaseWorker {
         $userInfo->Address = $addr;
         $userInfo->Contacts = $contacts;
         
+        $this->_getDB();
         return $userInfo;
     }
 
@@ -290,6 +348,10 @@ class DataBaseWorker {
 
     public function removeItem($id) {
         
+    }
+    
+    public function deleteOrder($login, $num) {
+        //TODO: проверить привелегии при исполнении (юзер или админ)
     }
     
     

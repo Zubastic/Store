@@ -28,8 +28,13 @@
     
     // Если 0 - корзина.
     if ($orderNum == "" || $orderNum == 0) {
-        $items = $dataBase->getCart($user->getLogin());
         $pageName = "Корзина";
+        // Проверим добавление нового товара.
+        $id = htmlspecialchars($_POST['id']);
+        if ($id != "") {
+            $dataBase->addItemToCart($user->getLogin(), $id);
+        }
+        $items = $dataBase->getCart($user->getLogin());
     } else {
         $pageName = "Заказ №" . $orderNum;
         $order = $dataBase->getOrder($orderNum);
@@ -92,13 +97,6 @@ EOL;
                  <div class="ItemsMenu">
                      <ul>
                          <?php
-                            
-                            // Проверим добавление нового товара.
-                            $id = htmlspecialchars($_POST)['id'];
-                            if ($id != "") {
-                                $dataBase->addItemToCart($user->getLogin(), $id);
-                            }
-                            
                             if (is_null($items)) {
                                 echo 'Такого заказа нет';
                             } else {

@@ -11,7 +11,7 @@
     if ($auth->isAuth()) {
         $user = $auth->getCurrentUser();
         $userInfo = $user->getUserInfo();
-        if (!$user->isAdmin() || !$user->isModerator())
+        if (!$user->isAdmin() && !$user->isModerator())
         {
             header('Refresh: 3; URL=../index.php');
             echo 'Доступ запрещен.';

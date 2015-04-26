@@ -52,8 +52,7 @@
                 if (htmlspecialchars($_POST['act']) == "checkout") {
                     $db->checkoutCart($user->getLogin());
                 }
-            
-            
+                
                 $orders = $db->getOrders($user->getLogin());
                 foreach ($orders as $order) {
                     printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a></li>', 

@@ -13,7 +13,7 @@
                                 $user = $auth->getCurrentUser();
                                 echo '<a class="headerLogin" href="userInfo.php">'.$user->getLogin().'</a>';
                                 echo '<a class="headerLogin" href="Autentication/login.php?action=logout">Выход</a>';
-                                if ($auth->isAdmin())
+                                if ($user->isAdmin())
                                 {
                                    echo '<a class="headerLogin" href="admin.php">Админ-меню</a>';
                                 }

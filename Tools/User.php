@@ -42,7 +42,7 @@ class User {
      */
     public function isAdmin() {
         $priv = $this->_userInfo->Privileges;
-        if ($priv == 7) {
+        if ($priv == Privileges::$Root) {
             return true;
         }
         return false;
@@ -55,7 +55,7 @@ class User {
      */
     public function isModerator() {
         $priv = $this->_userInfo->Privileges;
-        if ($priv == 3) {
+        if ($priv == Privileges::$Moderator) {
             return true;
         }
         return false;
