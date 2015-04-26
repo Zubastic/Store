@@ -71,13 +71,12 @@ class DataBaseWorker implements IDataBaseWorker {
 
     public function addOrder($login, $order) {
         
-            $slogin = htmlspecialchars($login);
+        $slogin = htmlspecialchars($login);
 
-            $userId = $this->findUser($slogin);
-            if ($userId <= 0) {
-                throw new InvalidArgumentException();
-            }
-            
+        $userId = $this->findUser($slogin);
+        if ($userId <= 0) {
+            throw new InvalidArgumentException("Такого пользователя нет.");
+        }
         try {
             // TODO: Научиться добавлять в связанные таблицы.
             // TODO: Добавить прочие поля.
@@ -86,16 +85,15 @@ class DataBaseWorker implements IDataBaseWorker {
             $this->database->exec("INSERT INTO Orders (Acc_Index, Ord_Number) VALUES ($values)");
 
             // Индекс занесенного заказа.
-            $ind = $this->database->query("SELECT MAX(Ord_Index) FROM Orders")->fetch()['Ord_Index'];
-
+            $info = $this->database->query("SELECT MAX(Ord_Index) FROM Orders");
+            $ind = $info->fetchAll()[0]['MAX(Ord_Index)'];
+            
             foreach($order->ItemList as $item) {
                 $values = "'$ind', '$item->Id', '1'";
                 $this->database->exec("INSERT INTO Orders_Info (Ord_Index, Goods_Index, Quantity) VALUES ($values)");
             }
         } catch (PDOException $ex) {
-            echo 'frv';
-            echo $ex->getMessage();
-            //throw $ex;
+            throw $ex;
         }
     }
 
@@ -154,7 +152,7 @@ class DataBaseWorker implements IDataBaseWorker {
         $slogin = htmlspecialchars($login);
         $info = $this->database->query("CALL FIND_USER('$slogin')");
         if ($info->rowCount() > 0) {
-            return $info->fetchAll()['Acc_Index'];
+            return $info->fetchAll()[0]['Acc_Index'];
         } else {
             return -1;
         }
