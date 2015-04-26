@@ -11,9 +11,9 @@
     if ($auth->isAuth()) {
         $user = $auth->getCurrentUser();
         $userInfo = $user->getUserInfo();
-        if (!$user->isAdmin())
+        if (!$user->isAdmin() || !$user->isModerator())
         {
-           header('Refresh: 3; URL=../index.php');
+            header('Refresh: 3; URL=../index.php');
             echo 'Доступ запрещен.';
             exit;
         }
@@ -62,8 +62,12 @@
             
                 $orders = $db->getAllOrders($user->getLogin());
                 foreach ($orders as $order) {
-                    printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a> <a href="orderInfo.php?orderDelete=%s">Delete</a></li>', 
-                            $order->Number, $order->Number, $order->Date, $order->Number);
+                    $str = '<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a>';
+                    if (!$user->isModerator())
+                    {
+                        $str += ' <a href="orderInfo.php?orderDelete=%s">Delete</a></li>';
+                    }
+                    printf($str, $order->Number, $order->Number, $order->Date, $order->Number);
                 }
             ?>
         </ul>
