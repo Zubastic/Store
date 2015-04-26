@@ -197,6 +197,10 @@ class DataBaseWorker implements IDataBaseWorker {
         
     }
 
+    public function getAllOrders($login) {
+        
+    }
+    
     public function getUserInfo($login) {
         
     }

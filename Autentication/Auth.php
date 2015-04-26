@@ -25,32 +25,6 @@ class AuthClass {
         else return false; //Пользователь не авторизован, т.к. переменная is_auth не создана
     }
     
-     /**
-     * Проверяет, имеет ли пользователь доступ в админку
-     * Возвращает true если имеет, иначе false
-     * @return boolean 
-     */
-    public function isAdmin() {
-        $priv = $this->getCurrentUser()->getPrivileges();
-        if ($priv == 7) {
-            return true;
-        }
-        return false;
-    }
-    
-     /**
-     * Проверяет, имеет ли пользователь доступ в админку
-     * Возвращает true если имеет, иначе false
-     * @return boolean 
-     */
-    public function isModerator() {
-        $priv = $this->getCurrentUser()->getPrivileges();
-        if ($priv == 3) {
-            return true;
-        }
-        return false;
-    }
-    
     /**
      * Авторизация пользователя
      * @param string $login

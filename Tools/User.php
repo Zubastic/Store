@@ -34,6 +34,32 @@ class User {
         $this->_userInfo = $userInfo;
         $this->_dbWorker->setUserInfo($this->_login, $userInfo);
     }
+    
+    /**
+     * Проверяет, имеет ли пользователь доступ в админку
+     * Возвращает true если имеет, иначе false
+     * @return boolean 
+     */
+    public function isAdmin() {
+        $priv = $this->_userInfo->Privileges;
+        if ($priv == 7) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Проверяет, имеет ли пользователь доступ в админку
+     * Возвращает true если имеет, иначе false
+     * @return boolean 
+     */
+    public function isModerator() {
+        $priv = $this->_userInfo->Privileges;
+        if ($priv == 3) {
+            return true;
+        }
+        return false;
+    }
 }
 
 
