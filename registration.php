@@ -8,7 +8,7 @@
                 $db = DBWorkerFabric::GetDataBaseWorker();
                 
                 if ($login != "" && $pwd != "") {
-                    if ($db->findUser($login)) {
+                    if ($db->findUser($login) > 0) {
                         echo 'Пользователь с таким именем уже есть.';
                     } else {
                         if ($db->addUser($login, $pwd)) {

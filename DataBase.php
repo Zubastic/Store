@@ -34,7 +34,7 @@ interface IDataBaseWorker {
     function getOrders($login);                 // Orders[]
     function addOrder($login, $order);          // void
     
-    // Оформить заказ из корзины.
+    // Оформить заказ из корзины (Удаляет из корзины и помещает в заказы).
     function checkoutCart($login);              // void
     function getOrder($login, $num);            // Order
 }
@@ -51,7 +51,6 @@ abstract class DBWorkerFabric {
         return self::$_dbWorker;
     }
 }
-
 
 class DataBaseWorker implements IDataBaseWorker {
     private $database = null;
@@ -72,6 +71,32 @@ class DataBaseWorker implements IDataBaseWorker {
 
     public function addOrder($login, $order) {
         
+            $slogin = htmlspecialchars($login);
+
+            $userId = $this->findUser($slogin);
+            if ($userId <= 0) {
+                throw new InvalidArgumentException();
+            }
+            
+        try {
+            // TODO: Научиться добавлять в связанные таблицы.
+            // TODO: Добавить прочие поля.
+            $ordNum = time();
+            $values = "'$userId', '$ordNum'";
+            $this->database->exec("INSERT INTO Orders (Acc_Index, Ord_Number) VALUES ($values)");
+
+            // Индекс занесенного заказа.
+            $ind = $this->database->query("SELECT MAX(Ord_Index) FROM Orders")->fetch()['Ord_Index'];
+
+            foreach($order->ItemList as $item) {
+                $values = "'$ind', '$item->Id', '1'";
+                $this->database->exec("INSERT INTO Orders_Info (Ord_Index, Goods_Index, Quantity) VALUES ($values)");
+            }
+        } catch (PDOException $ex) {
+            echo 'frv';
+            echo $ex->getMessage();
+            //throw $ex;
+        }
     }
 
     public function addUser($login, $pwd) {
@@ -86,7 +111,15 @@ class DataBaseWorker implements IDataBaseWorker {
     }
 
     public function checkoutCart($login) {
+        $slogin = htmlspecialchars($login);
         
+        $order = new Order();
+        $order->ItemList = $this->getCart($slogin);
+        $order->Date = DateTime::W3C;
+        $order->Login = $slogin;
+        
+        $this->addOrder($slogin, $order);
+        $this->clearCart($slogin);
     }
 
     public function clearCart($login) {
@@ -120,11 +153,28 @@ class DataBaseWorker implements IDataBaseWorker {
     public function findUser($login) {
         $slogin = htmlspecialchars($login);
         $info = $this->database->query("CALL FIND_USER('$slogin')");
-        return $info->rowCount() > 0;
+        if ($info->rowCount() > 0) {
+            return $info->fetchAll()['Acc_Index'];
+        } else {
+            return -1;
+        }
     }
 
+    
     public function getCart($login) {
+        // TODO: Учитывать количество.
+        $slogin = htmlspecialchars($login);
+        $info = $this->database->query("CALL GET_CART('$slogin')");
         
+        $items = array();
+        $arr = $info->fetchAll();
+        foreach ($arr as $itemArr) {
+            $item = new Item($itemArr);
+            //$item->CountToOrder = $arr['Quantity'];
+            $items[] = $item;
+        }
+        
+        return $items;
     }
 
     // Возвращает массив имен категорий.

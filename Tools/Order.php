@@ -12,8 +12,11 @@
             
             // TODO: Сделать нормальную дату (DateTime).
             $this->Date = $array['date'];
+            
+            //$this->Login = $login;
         }
 
+        public $Login = "";
         public $Number = 0;
         public $ItemList = array();
         public $Date = null;

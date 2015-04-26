@@ -34,7 +34,8 @@
         public $Count = 0;
         public $Description = "";
         public $Category = "";
-        
+
+
         public function __construct($array) {
             $this->Name = $array['Name'];
             $this->Id = $array['Goods_Index'];
