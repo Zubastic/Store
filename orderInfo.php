@@ -40,7 +40,7 @@
         <title><?php printf($pageName) ?></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <linсрk rel="stylesheet" type="text/css" href="css/Styles.css"> 
+        <link rel="stylesheet" type="text/css" href="css/Styles.css"> 
         <link rel="stylesheet" type="text/css" href="css/Styles_Items.css"> 
         
         <script src="script/jquery-1.10.2.min.js"></script>
