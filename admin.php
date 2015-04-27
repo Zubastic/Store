@@ -53,21 +53,13 @@
         <ul>
             <?php
                 $db = DBWorkerFabric::GetDataBaseWorker();
-                
-                // Оформляем заказ
-                if (htmlspecialchars($_POST['act']) == "checkout") {
-                    $db->checkoutCart($user->getLogin());
-                }
-            
             
                 $orders = $db->getAllOrders($user->getLogin());
                 foreach ($orders as $order) {
-                    $str = '<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a>';
-                    if (!$user->isModerator())
-                    {
-                        $str += ' <a href="orderInfo.php?orderDelete=%s">Delete</a></li>';
-                    }
-                    printf($str, $order->Number, $order->Number, $order->Date, $order->Number);
+                    //echo $order->Number;
+                    printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s</a><a href="orderInfo.php?orderDelete=%s">  Delete</a></li>',
+                            $order->Number, $order->Number, $order->Number);
+                    
                 }
             ?>
         </ul>

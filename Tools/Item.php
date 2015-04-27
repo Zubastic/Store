@@ -9,15 +9,32 @@
         public static $InfoBtn = 0x10;
         public static $Price = 0x20;
         public static $Count = 0x40;
-        
-        public static function getMainMenu() {
+        public static $btnRemoveFromCart = 0x80;
+        public static $btnRemoveItem = 0x100;
+
+                public static function getMainMenu() {
             return ItemElements::$Name | ItemElements::$Img | ItemElements::$Description
                     | ItemElements::$Price | ItemElements::$InfoBtn;
         }
         
         public static function getFullItemInfo($isAuth) {
             $result = ItemElements::$Name | ItemElements::$Img | ItemElements::$Description
-                    | ItemElements::$Price | self::$Count;
+                    | ItemElements::$Price;
+            if ($isAuth) {
+                 $result |= self::$CartBtn;
+            }
+            return $result;
+        }
+        
+        public static function getCartItemInfo() {
+            $result = ItemElements::$Name | ItemElements::$Img | ItemElements::$Description
+                    | ItemElements::$Price | self::$btnRemoveFromCart;
+            return $result;
+        }
+        
+        public static function getAdminItemInfo() {
+            $result = ItemElements::$Name | ItemElements::$Img | ItemElements::$Description
+                    | ItemElements::$Price | self::$InfoBtn |  self::$btnRemoveItem;
             if ($isAuth) {
                  $result |= self::$CartBtn;
             }
@@ -47,7 +64,6 @@
         }
         
         public function show($elementsToShow) {
-            
             if ($elementsToShow & ItemElements::$Name) {
                 $this->showName();
             }
@@ -74,9 +90,21 @@
                 $this->showCartBtn();
             }
             
+            if ($elementsToShow & ItemElements::$btnRemoveFromCart) {
+                $this->showRemoveFromCartBtn();
+            }
+            
+            
+            if ($elementsToShow & ItemElements::$btnRemoveItem) {
+                $this->showRemoveItemBtn();
+            }
+            
+            
+            /*
             if ($elementsToShow & ItemElements::$Count) {
                 $this->showCount();
             }
+             */
             
             $this->endMenu();
             
@@ -119,6 +147,32 @@ EOL;
 EOL;
         }
         
+        private function showRemoveFromCartBtn() {
+            echo <<< EOL
+                         
+                <div class="addBasket priceContainer">
+                    <form class="ButtonBasket" method="POST" action="orderInfo.php">
+                        <input type="text" name="id" value="{$this->Id}" hidden="true"></input>
+                        <input type="text" name="remove" value="true" hidden="true"></input>
+                        <input type="submit" value="Удалить из корзины"></input>
+                    </form>
+                </div>
+                        
+EOL;
+        }
+        
+        private function showRemoveItemBtn() {
+            echo <<< EOL
+                <div class="addBasket priceContainer">
+                    <form class="ButtonBasket" method="POST" action="index.php">
+                        <input type="text" name="id" value="{$this->Id}" hidden="true"></input>
+                        <input type="text" name="removeItem" value="true" hidden="true"></input>
+                        <input type="submit" value="Удалить товар"></input>
+                    </form>
+                </div>
+EOL;
+        }
+        
         private function showPrice() {
             echo <<< EOL
             <div class="priceContainer">
@@ -153,6 +207,7 @@ EOL;
                 </span>
 EOL;
         }
+        
        
         private function endMenu() {
             echo '</div>';

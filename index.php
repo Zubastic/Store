@@ -2,6 +2,7 @@
 <?php
     include_once "DataBase.php";
     include_once 'Tools/Item.php';
+    include_once 'Autentication/Auth.php';
 ?>
 
 <html>
@@ -42,6 +43,15 @@
                      <ul>
                          
                          <?php
+                            $id = htmlspecialchars($_POST['id']);
+                            if ($id != "") {
+                                if (htmlspecialchars($_POST['removeItem'] == "true") ) {
+                                    echo 'vew';
+                                    $db = DBWorkerFabric::GetDataBaseWorker();
+                                    $db->removeItem($user->getLogin(), $id);
+                                }
+                            }
+                         
                             $searchQuery = new SearchQuery();
                             $searchQuery->CategoryIndex = htmlspecialchars($_GET['category']);
                             $searchQuery->Contains = htmlspecialchars($_GET['name_contains']);
@@ -49,9 +59,16 @@
                             $db = DBWorkerFabric::GetDataBaseWorker();
                             $items = $db->findItems($searchQuery);
                             
+                            $auth = AuthFabric::GetAuth();
+                            $usr = $auth->getCurrentUser();
+                            
                             foreach ($items as $item) {
                                 echo '<li class="ItemList" >';
-                                    $item->show(ItemElements::getMainMenu());
+                                    if ($usr->isAdmin() || $usr->isModerator()) {
+                                        $item->show(ItemElements::getAdminItemInfo());
+                                    } else {
+                                        $item->show(ItemElements::getMainMenu());
+                                    }
                                 echo '</l>';
                             }
                          ?>

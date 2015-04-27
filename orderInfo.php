@@ -32,7 +32,11 @@
         // Проверим добавление нового товара.
         $id = htmlspecialchars($_POST['id']);
         if ($id != "") {
-            $dataBase->addItemToCart($user->getLogin(), $id);
+            if (htmlspecialchars($_POST['remove'] == "true") ) {
+                $dataBase->removeItemFromCart($user->getLogin(), $id);
+            } else {
+                $dataBase->addItemToCart($user->getLogin(), $id);
+            }
         }
         $items = $dataBase->getCart($user->getLogin());
     } else {
@@ -102,7 +106,12 @@ EOL;
                             } else {
                                 foreach ($items as $item) {
                                     echo '<li class="ItemList">';
-                                        $item->show(ItemElements::getFullItemInfo(true));
+                                        if ($orderNum == "" || $orderNum == 0) {
+                                            $itemStyle = ItemElements::getCartItemInfo();
+                                        } else {
+                                            $itemStyle = ItemElements::getFullItemInfo(true);
+                                        }
+                                        $item->show($itemStyle);
                                     echo '</li>';
                                 }
                             }

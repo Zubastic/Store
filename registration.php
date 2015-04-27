@@ -11,13 +11,10 @@
                     if ($db->findUser($login) > 0) {
                         echo 'Пользователь с таким именем уже есть.';
                     } else {
-                        if ($db->addUser($login, $pwd)) {
-                            $handeled = true;
-                            header('Refresh: 2; URL=index.php');
-                            echo 'Регистрация завершена успешно';
-                        } else {
-                            echo 'Ошибка при регистрации.';
-                        }
+                        $db->addUser($login, $pwd);
+                        $handeled = true;
+                        header('Refresh: 2; URL=index.php');
+                        echo 'Регистрация завершена успешно';
                     }
                 }
             ?>

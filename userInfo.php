@@ -42,7 +42,7 @@
 <html>
     <head>
         <?php
-            printf('<title>%s - инфо</title>', $userInfo->Login);
+            printf('<title>%s - инфо</title>', $user->getLogin());
         ?>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

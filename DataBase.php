@@ -29,7 +29,7 @@ interface IDataBaseWorker {
     function addItemToCart($login, $itemId);    // void
     function findItems($searchQuery);           // Item[]
     function getItem($id);                      // Item
-    function removeItem($id);                   // void
+    function removeItem($login, $id);                   // void
     function getCart($login);                   // Item[]
     function clearCart($login);                 // void
     function getAllOrders();                    // Orders[]
@@ -103,7 +103,16 @@ class DataBaseWorker {
         $this->database->exec("INSERT INTO CustomerCart (Acc_Index, Item_Index, Quantity) VALUES ('$usrId', '$sitemId','1')");
         $this->_getDB();
     }
+    
+    public function removeItemFromCart($login, $itemId) {
+        $s_login = htmlspecialchars($login);
+        $s_itemId = htmlspecialchars($itemId);
 
+        $usrId = $this->findUser($s_login);
+        
+        $this->_makeExec($s_login, "DELETE FROM CustomerCart WHERE Acc_Index=$usrId AND Item_Index=$s_itemId");
+    }
+    
     public function addOrder($login, $order) {
         $this->_getDB();
         
@@ -137,15 +146,17 @@ class DataBaseWorker {
 
     public function addUser($login, $pwd) {
         
-        // TODO: Пустая строка в адресе.
         $this->_getDB();
         
-        $slogin = htmlspecialchars($login);
+        $s_login = htmlspecialchars($login);
         $spwd = htmlspecialchars($pwd);
         
         // TODO: Хэшировать.
-        $this->database->exec("INSERT INTO Accounts (Login, Password) VALUES ('$slogin','$spwd')");
+        $this->database->exec("INSERT INTO Accounts (Login, Password) VALUES ('$s_login','$spwd')");
         $this->_getDB();
+        
+        $uId = $this->findUser($s_login);
+        $this->_makeExec($s_login, "INSERT INTO Customers_Address (Acc_Index) VALUES ('$uId')");
     }
 
     public function checkUser($login, $pwd) {
@@ -292,7 +303,6 @@ class DataBaseWorker {
 
     public function getOrders($login) {
         $this->_getDB();
-        
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
         $info = $this->database->query("CALL GET_ORDERS($id)");
@@ -311,11 +321,12 @@ class DataBaseWorker {
     public function getAllOrders() {
         $this->_getDB();
         
-        $info = $this->database->query("SELECT Ord_Number FROM Orders");
-        $orders = array();
+        $query = $this->database->query("SELECT Ord_Number FROM Orders");
+        $info = $query->fetchAll();
         
-        foreach ($info->fetchAll()[0] as $orderNum) {
-            $orders[] = $this->getOrder($orderNum);
+        $orders = array();
+        foreach ($info as $orderNum) {
+            $orders[] = $this->getOrder($orderNum[0]);
         }
         $this->_getDB();
         return $orders;
@@ -408,15 +419,17 @@ class DataBaseWorker {
     }
 
     public function removeItem($login, $id) {
+        $s_login = htmlspecialchars($login);
+        $s_id = htmlspecialchars($id);
         
+        $this->_makeExec($s_login, "DELETE FROM Goods WHERE Goods_Index=$s_id");
     }
     
     public function removeOrder($login, $num) {
-        $this->_getDB();
+        $s_login = htmlspecialchars($login);
+        $s_num = htmlspecialchars($num);
         
-        
-        
-        $this->_getDB();
+        $this->_makeExec($s_login, "DELETE FROM Orders WHERE Ord_Number=$s_num");
     }
     
     

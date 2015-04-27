@@ -54,12 +54,15 @@
                 }
                 
                 $orders = $db->getOrders($user->getLogin());
+                
                 foreach ($orders as $order) {
                     printf('<li><a href="orderInfo.php?orderNum=%s">Заказ №%s,  Дата: %s</a></li>', 
                             $order->Number, $order->Number, $order->Date);
                 }
             ?>
         </ul>
+        
+        <?php include 'Elements/footerMenu.php'; ?>
         
     </body>
 </html>
