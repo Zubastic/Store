@@ -34,6 +34,9 @@
         if ($id != "") {
             if (htmlspecialchars($_POST['remove'] == "true") ) {
                 $dataBase->removeItemFromCart($user->getLogin(), $id);
+                //header('Refresh: 3; URL=index.php');
+                //echo 'Удалено';
+                //exit();
             } else {
                 $dataBase->addItemToCart($user->getLogin(), $id);
             }

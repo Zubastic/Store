@@ -428,7 +428,6 @@ class DataBaseWorker {
     public function removeOrder($login, $num) {
         $s_login = htmlspecialchars($login);
         $s_num = htmlspecialchars($num);
-        
         $this->_makeExec($s_login, "DELETE FROM Orders WHERE Ord_Number=$s_num");
     }
     

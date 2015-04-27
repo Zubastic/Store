@@ -3,6 +3,21 @@
     include_once "DataBase.php";
     include_once 'Tools/Item.php';
     include_once 'Autentication/Auth.php';
+    include_once 'Tools/User.php';
+    
+    $auth = AuthFabric::GetAuth();
+    $user = $auth->getCurrentUser();
+    
+    $id = htmlspecialchars($_POST['id']);
+    if ($id != "") {
+        if (htmlspecialchars($_POST['removeItem'] == "true") ) {
+            $db = DBWorkerFabric::GetDataBaseWorker();
+            $db->removeItem($user->getLogin(), $id);
+            //header('Refresh: 3; URL=./index.php');
+            //echo 'Удалено.';
+            //exit();
+        }
+    }
 ?>
 
 <html>
@@ -43,14 +58,7 @@
                      <ul>
                          
                          <?php
-                            $id = htmlspecialchars($_POST['id']);
-                            if ($id != "") {
-                                if (htmlspecialchars($_POST['removeItem'] == "true") ) {
-                                    echo 'vew';
-                                    $db = DBWorkerFabric::GetDataBaseWorker();
-                                    $db->removeItem($user->getLogin(), $id);
-                                }
-                            }
+                            
                          
                             $searchQuery = new SearchQuery();
                             $searchQuery->CategoryIndex = htmlspecialchars($_GET['category']);
@@ -59,12 +67,11 @@
                             $db = DBWorkerFabric::GetDataBaseWorker();
                             $items = $db->findItems($searchQuery);
                             
-                            $auth = AuthFabric::GetAuth();
-                            $usr = $auth->getCurrentUser();
+                            
                             
                             foreach ($items as $item) {
                                 echo '<li class="ItemList" >';
-                                    if ($usr->isAdmin() || $usr->isModerator()) {
+                                    if ($user->isAdmin() || $user->isModerator()) {
                                         $item->show(ItemElements::getAdminItemInfo());
                                     } else {
                                         $item->show(ItemElements::getMainMenu());
