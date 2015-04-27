@@ -73,15 +73,15 @@ class Address {
 abstract class Privileges {
     public static $Guest = 0;
     public static $User = 1; // TODO: Константу сделать.
-    public static $Moderator = 3; // TODO: Константу сделать.
-    public static $Root = 7; // TODO: Константу сделать.
+    public static $Moderator = 2; // TODO: Константу сделать.
+    public static $Root = 3; // TODO: Константу сделать.
 }
 
 // TODO: Константы.
 abstract class ContactType {
     public static $allTypes = array(Email => 0, Phone => 1);
-    public static $Email = 0;
-    public static $Phone = 1;
+    public static $Email = "Email";
+    public static $Phone = 'Phone';
 }
 
 class Contact {
@@ -101,7 +101,7 @@ class UserInfo {
         $this->MidName = $array['Patronym'];
         $this->Surname = $array['Last_Name'];
         //$this->Address = new Address($array['address']);
-        $this->Privileges = $array['privileges'];
+        $this->Privileges = $array['Group_Index'];
         /*
         foreach ($array['contacts'] as $contact) {
             $this->Contacts[] = new Contact($contact['type'], $contact['data']);

@@ -12,7 +12,6 @@
     $auth = AuthFabric::GetAuth();
     if ($auth->isAuth()) {
         $user = $auth->getCurrentUser();
-        $userInfo = $user->getUserInfo();
     } else {
         header('Refresh: 3; URL=../index.php');
         echo 'Пользователь не зарегистрирован.';
@@ -20,17 +19,23 @@
     }
     
     // Обрабатываем данные.
-    $POST_MASS = htmlspecialchars($_POST);
-    if (!is_null($POST_MASS)) {
-        $newUserInfo->Name = $POST_MASS['name'];
-        $newUserInfo->MidName = $POST_MASS['midname'];
-        $newUserInfo->Surname = $POST_MASS['surname'];
-        $newUserInfo->Address = $POST_MASS['address'];
-        for($i = 0; $i < count($POST_MASS['contact']); $i++) {
-            $newUserInfo->Contacts[] = new Contact($POST_MASS['contact_type'][$i],
-                    $POST_MASS['contact'][$i]);
+    if (isset($_POST['name'])) {
+        $newUserInfo->Name = htmlspecialchars($_POST['name']);
+        $newUserInfo->MidName = htmlspecialchars($_POST['midname']);
+        $newUserInfo->Surname = htmlspecialchars($_POST['surname']);
+        $newUserInfo->Address = new Address();
+        $newUserInfo->Address->Country = htmlspecialchars($_POST['country']);
+        $newUserInfo->Address->City = htmlspecialchars($_POST['city']);
+        $newUserInfo->Address->Addr = htmlspecialchars($_POST['address']);
+        $newUserInfo->Address->AdditionalInfo = htmlspecialchars($_POST['extraAddr']);
+
+        for($i = 0; $i < count($_POST['contact']); $i++) {
+            $type = htmlspecialchars($_POST['contact_type'][$i]);
+            $data = htmlspecialchars($_POST['contact'][$i]);
+            $newUserInfo->Contacts[] = new Contact($type, $data);
         }
         $user->setUserInfo($newUserInfo);
+        
     }
 ?>
 
@@ -51,39 +56,51 @@
         
         <form action="userInfo.php" method="POST">
             <?php
+                if (!is_null($newUserInfo)) {
+                    echo 'Данные сохранены';
+                }
+                $userInfo = $user->getUserInfo();
                 // TODO: Придумать другое имя для класса.
                 printf('<div class="userInfo">');
                     printf('<div>Имя: <input type="text" name="name" value="%s"></input></div>',$userInfo->Name);
                     printf('<div>Отчество: <input type="text" name ="midname" value="%s"></input></div>',$userInfo->MidName);
                     printf('<div>Фамилия: <input type="text" name ="surname" value="%s"></input></div>',$userInfo->Surname);
-                    printf('<div>Адрес: <input type="text" name ="address" value="%s"></input></div>',$userInfo->Address);
                     
+                    printf('<div>Адрес:</div>');
+                    printf('<div>Страна: <input type="text" name ="country" value="%s"></input></div>',$userInfo->Address->Country);
+                    printf('<div>Город: <input type="text" name ="city" value="%s"></input></div>',$userInfo->Address->City);
+                    printf('<div>Адрес: <input type="text" name ="address" value="%s"></input></div>',$userInfo->Address->Addr);
+                    printf('<div>Дополнительно: <input type="text" name ="extraAddr" value="%s"></input></div>',$userInfo->Address->AdditionalInfo);
+
                     printf('<div> Контакты: </div>');
                     for ($i = 0; $i < count($userInfo->Contacts); $i++) {
                         $contact = $userInfo->Contacts[$i];
+                        
                         printf('<div>');
-                        printf('<select name="contact_type[]">');
+                        printf('<select class="cont%s" name="contact_type[]">', $i);
                         
                         // TODO: Выводить опции из массива.
                         // TODO: Жесть какая-то, потом исправить.
                         if ($contact->Type == ContactType::$Email) {
-                            printf('<option selected value="0">Email</option>');
+                            printf('<option selected value="Email">Email</option>');
                         } else {
-                            printf('<option value="0">Email</option>');                            
+                            printf('<option value="Email">Email</option>');                            
                         }
                         if ($contact->Type == ContactType::$Phone) {
-                            printf('<option selected value="1">Phone</option>');
+                            printf('<option selected value="Phone">Phone</option>');
                         } else {
-                            printf('<option value="1">Phone</option>');                        
+                            printf('<option value="Phone">Phone</option>');                        
                         }
                         
                         printf('</select>');
-                        printf('<input type="text" name ="contact[]" id="%i" value="%s"></input>', $i, $contact->Data);
+                        printf('<input class="cont%s" type="text" name ="contact[]" value="%s"></input>', $i, $contact->Data);
+                        printf('<span class="cont%s"> <a onclick="removeContact(%s)">Удали</a></span>', $i, $i);
                         printf('</div>');
+                        
                     }
                 printf('</div>');
             ?>
-            <a onclick="AddContact()">Добавить контакт</a>
+            <a onclick="addContact()">Добавить контакт</a>
             <div><input type="submit" value="Сохранить"></input></div>
         </form>
     </body>

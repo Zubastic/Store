@@ -21,7 +21,7 @@
     $orderDelete = htmlspecialchars($_GET['$orderDelete']);
     if ($orderDelete != "" && $user->isAdmin()) {
         header('Refresh: 3; URL=../admin.php');
-        $order = $dataBase->deleteOrder($user->getLogin(), $orderDelete);
+        $order = $dataBase->removeOrder($user->getLogin(), $orderDelete);
         echo 'Заказ ' + $orderDelete + " удален!";
         exit;
     }

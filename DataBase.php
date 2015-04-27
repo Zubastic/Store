@@ -56,6 +56,20 @@ abstract class DBWorkerFabric {
 class DataBaseWorker {
     private $database = null;
 
+    private function _makeQuery($login, $statement) {
+        $this->_getDB();
+        return $this->database->query($statement);
+        $this->_getDB();
+    }
+
+    private function _makeExec($login, $statement) {
+        $this->_getDB();
+        return $this->database->exec($statement);
+        $this->_getDB();
+    }
+
+
+// TODO: Передавать логин для проверки привилегий.
     private function _getDB() {
         unset($this->database);
         
@@ -122,6 +136,8 @@ class DataBaseWorker {
     }
 
     public function addUser($login, $pwd) {
+        
+        // TODO: Пустая строка в адресе.
         $this->_getDB();
         
         $slogin = htmlspecialchars($login);
@@ -274,8 +290,6 @@ class DataBaseWorker {
         return $order;
     }
 
-
-    
     public function getOrders($login) {
         $this->_getDB();
         
@@ -310,23 +324,27 @@ class DataBaseWorker {
     public function getUserInfo($login) {
         $this->_getDB();
         
-        $slogin = htmlspecialchars($login);
-        $id = $this->findUser($slogin);
+        $s_login = htmlspecialchars($login);
+        $id = $this->findUser($s_login);
         
         $query = $this->database->query("CALL GET_USER_INFO($id)");
         $info = $query->fetchAll();
         
         $userInfo = new UserInfo($info[0]);
         
-        $addr = array();
-        foreach ($info as $value) {
-            $a = new Address();
-            $a->Country = $value['Country'];
-            $a->City = $value['City'];
-            $a->Addr = $value['Address'];
-            $addr[] = $a;
-        }
+        $query = $this->_makeQuery($s_login, "CALL GET_USER_ADDRESS($id)");
+        $info = $query->fetchAll()[0];
         
+        
+        $a = new Address();
+        $a->Country = $info['Country'];
+        $a->City = $info['City'];
+        $a->Addr = $info['Address'];
+        $a->AdditionalInfo = $info['Additional_Info'];
+        $addr = $a;
+
+        $query = $this->_makeQuery($s_login, "CALL GET_USER_CONTACTS($id)");
+        $info = $query->fetchAll();
         $contacts = array();
         foreach ($info as $value) {
             $c = new Contact();
@@ -343,15 +361,62 @@ class DataBaseWorker {
     }
 
     public function setUserInfo($login, $userInfo) {
+        $this->_getDB();
         
+        $s_login = htmlspecialchars($login);
+        
+        $s_name = $userInfo->Name;
+        $s_midName = $userInfo->MidName;
+        $s_surname = $userInfo->Surname;
+        $s_priv = $userInfo->Privileges;
+        if ($s_priv == "") {
+            $s_priv = 1;
+        }
+        
+        $s_addr = new Address();
+        $s_addr->Country = htmlspecialchars($userInfo->Address->Country);
+        $s_addr->City = htmlspecialchars($userInfo->Address->City);
+        $s_addr->Addr = htmlspecialchars($userInfo->Address->Addr);
+        $s_addr->AdditionalInfo = htmlspecialchars($userInfo->Address->AdditionalInfo);
+        
+        $s_contacts = array();
+        foreach ($userInfo->Contacts as $value) {
+            $s_contacts[] = new Contact(htmlspecialchars($value->Type), htmlspecialchars($value->Data));
+        }
+        
+        
+        $q = "UPDATE Accounts SET First_Name='$s_name', Last_Name = '$s_surname', Patronym = '$s_midName', Group_Index = $s_priv WHERE Login='$s_login'";
+        $this->_makeExec($s_login, $q);
+        
+        $usrId = $this->findUser($s_login);
+        
+        // Адрес.
+        $q = "UPDATE Customers_Address SET Country='$s_addr->Country', City='$s_addr->City', Address='$s_addr->Addr', Additional_Info='$s_addr->AdditionalInfo' WHERE Acc_Index=$usrId";
+        $this->_makeExec($s_login, $q);
+        
+        // Радикальненько: удаляем все контакты, а потом заливаем сызнова.
+        $q = "DELETE FROM Customers_Contacts WHERE Acc_Index = $usrId";
+        $this->_makeExec($s_login, $q);
+        
+        
+        foreach ($s_contacts as $contact) {
+            $q = "INSERT INTO Customers_Contacts (Acc_Index, ContactType, Data) VALUES ('$usrId', '$contact->Type', '$contact->Data')";
+            $this->_makeExec($s_login, $q);
+        }
+        
+        $this->_getDB();
     }
 
-    public function removeItem($id) {
+    public function removeItem($login, $id) {
         
     }
     
-    public function deleteOrder($login, $num) {
-        //TODO: проверить привелегии при исполнении (юзер или админ)
+    public function removeOrder($login, $num) {
+        $this->_getDB();
+        
+        
+        
+        $this->_getDB();
     }
     
     

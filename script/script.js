@@ -96,10 +96,18 @@ function Login() {
 };
 
 // TODO: Сделать клонирование.
-function AddContact() {
+function addContact() {
     var element = document.createElement('div');
     var h = '<select><option value="Email">Email</option><option value="Phone">Phone</option></select>';
-    h += '<input type="text" name ="contact" id="" value=""></input>';
+    h += '<input type="text" name ="contact[]" value=""></input>';
     element.innerHTML = h;
     $('.userInfo').append(element);
+}
+
+function removeContact(ind) {
+    //var element = document.createElement('div');
+    var s = '.cont';
+    s += ind;
+    
+    $(s).remove();
 }
