@@ -25,8 +25,8 @@
          <div class="container">
             <div class="Search">
                  <form>
-                     <input class="SearchInput" type="text" hidden="true" placeholder="Поиск">
-                     <input class="ButtonSubmit" type="submit" hidden="true" value="Найти"> 
+                     <input class="SearchInput" type="text" placeholder="Поиск">
+                     <input class="ButtonSubmit" type="submit" value="Найти"> 
                  </form>
                 </div>
              <div class="closer"></div>

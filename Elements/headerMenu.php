@@ -27,9 +27,6 @@
                 
                 <div class="headerMenu">
                     <ul class="headerMenuList">
-                        <li class="headerMenuItem">
-                            <a class="headerText" title="На главную" href="index.php">На главную</a>                            
-                        </li>
                         <?php
                             if ($auth->isAuth()) {
                                 $actOrders = 'href="orders.php"';

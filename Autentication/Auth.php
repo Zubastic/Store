@@ -1,7 +1,7 @@
 <?php
 session_start();
 include_once './DataBase.php';
-include_once 'Tools/User.php';
+include_once './Tools/User.php';
 
 class AuthClass {
     
