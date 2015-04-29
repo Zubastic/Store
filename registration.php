@@ -41,7 +41,7 @@ and open the template in the editor.
             ?>
             <form action="registration.php" method="POST">
                 <div>Логин: <input type="text" name="login" /></div>
-                <div>Пароль: <input type="text" name="pwd" /></div>
+                <div>Пароль: <input type="PASSWORD" name="pwd" /></div>
 
                 <div><input type="submit" value="Зарегистрироваться"/> </div>
             </form>
