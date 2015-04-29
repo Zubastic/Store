@@ -12,7 +12,7 @@ class User {
         $this->_dbWorker = $dbWorker;
         $this->_login = $login;
         if ($login == "") {
-            $this->_userInfo = new UserInfo();            
+            return null;            
         } else {
             $this->_userInfo = $this->_dbWorker->getUserInfo($login);
         }

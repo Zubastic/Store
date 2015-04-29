@@ -6,7 +6,8 @@
         echo '<ul class="CatalogList">';
 
             // Массив придет из БД.
-            $items = DBWorkerFabric::GetDataBaseWorker()->getCategories();
+            $db = DBWorkerFabric::GetDataBaseWorker();
+            $items = $db->getCategories();
 
             for($i = 0; $i < count($items); $i++) {
                 $ind = $i + 1;

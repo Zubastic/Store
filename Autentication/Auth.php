@@ -1,8 +1,7 @@
 <?php
-
-include_once '../DataBase.php';
-include_once 'Tools/User.php';
 session_start();
+include_once './DataBase.php';
+include_once 'Tools/User.php';
 
 class AuthClass {
     
@@ -51,8 +50,11 @@ class AuthClass {
     
     //  Возвращет текущего пользователя.
     public function getCurrentUser() {
-        return new User($this->getCurrentLogin(), 
-                $this->_dbWorker);
+        if ($this->getCurrentLogin() != "")
+        {
+            return new User($this->getCurrentLogin(), $this->_dbWorker);
+        }
+        return null;
     }
     
     
@@ -77,5 +79,3 @@ abstract class AuthFabric {
         return self::$_auth;
     }
 }
-
-?>

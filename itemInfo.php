@@ -1,9 +1,9 @@
-<!DOCTYPE html>
 <?php
     include_once "DataBase.php";
     include_once "Autentication/Auth.php";
 ?>
 
+<!DOCTYPE html>
 <html>
     <head>
         <title>Интернет-магазин</title>

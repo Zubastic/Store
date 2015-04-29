@@ -1,6 +1,6 @@
 <?php
 
-include 'Tools/UserInfo.php';
+include 'Tools/User.php';
 include_once 'Tools/Item.php';
 include_once 'Tools/Order.php';
 //include_once 'Category.php';

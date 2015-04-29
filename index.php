@@ -1,25 +1,14 @@
-<!DOCTYPE html>
 <?php
-    include_once "DataBase.php";
+    include_once 'DataBase.php';
     include_once 'Tools/Item.php';
     include_once 'Autentication/Auth.php';
     include_once 'Tools/User.php';
     
     $auth = AuthFabric::GetAuth();
     $user = $auth->getCurrentUser();
-    
-    $id = htmlspecialchars($_POST['id']);
-    if ($id != "") {
-        if (htmlspecialchars($_POST['removeItem'] == "true") ) {
-            $db = DBWorkerFabric::GetDataBaseWorker();
-            $db->removeItem($user->getLogin(), $id);
-            //header('Refresh: 3; URL=./index.php');
-            //echo 'Удалено.';
-            //exit();
-        }
-    }
 ?>
 
+<!DOCTYPE html>
 <html>
     <head>
         <title>Интернет-магазин</title>
@@ -68,15 +57,21 @@
                             $items = $db->findItems($searchQuery);
                             
                             
-                            
-                            foreach ($items as $item) {
-                                echo '<li class="ItemList" >';
-                                    if ($user->isAdmin() || $user->isModerator()) {
-                                        $item->show(ItemElements::getAdminItemInfo());
-                                    } else {
-                                        $item->show(ItemElements::getMainMenu());
-                                    }
-                                echo '</l>';
+                            if ($items != null)
+                            {   
+                                foreach ($items as $item) {
+                                    echo '<li class="ItemList" >';
+                                        if ($user != null && ($user->isAdmin() || $user->isModerator())) {
+                                            $item->show(ItemElements::getAdminItemInfo());
+                                        } else {
+                                            $item->show(ItemElements::getMainMenu());
+                                        }
+                                    echo '</l>';
+                                }
+                            }
+                            else
+                            {
+                                echo 'По Вашему запросу ничего не найдено.';
                             }
                          ?>
                      </ul>

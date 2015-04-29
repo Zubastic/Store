@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-
 <?php
     include_once "Autentication/Auth.php";
     include_once "Tools/User.php";
@@ -18,6 +16,7 @@
     }
 ?>
 
+<!DOCTYPE html>
 <html>
     <head>
         <title>Заказы</title>

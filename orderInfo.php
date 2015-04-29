@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
     include_once "Autentication/Auth.php";
     include_once "Tools/User.php";
@@ -49,10 +48,9 @@
             $items = $order->ItemList;
         }
     }
-    
-    
 ?>
 
+<!DOCTYPE html>
 <html>
     <head>
         <title><?php printf($pageName) ?></title>
@@ -105,7 +103,7 @@ EOL;
                      <ul>
                          <?php
                             if (is_null($items)) {
-                                echo 'Такого заказа нет';
+                                echo 'Такой заказ не существует!';
                             } else {
                                 foreach ($items as $item) {
                                     echo '<li class="ItemList">';

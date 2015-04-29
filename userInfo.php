@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-
 <!--TODO: Проверять пользователя на зареганность.-->
-
 <?php
     include "Autentication/Auth.php";
     include_once "Tools/User.php";
@@ -39,6 +36,7 @@
     }
 ?>
 
+<!DOCTYPE html>
 <html>
     <head>
         <?php
