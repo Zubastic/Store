@@ -1,5 +1,5 @@
 <div class="ModalWnd UserLoginModalWnd">
-    <form action="Autentication/login.php?action=login" method="POST">
+    <form action="login.php?action=login" method="POST">
         <div>Логин: <input type="text" name="login" /></div>
         <div>Пароль: <input type="PASSWORD" name="pwd" /></div>
         

@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 include 'Tools/User.php';
 include_once 'Tools/Item.php';
 include_once 'Tools/Order.php';
@@ -55,9 +55,14 @@ abstract class DBWorkerFabric {
 
 class DataBaseWorker {
     private $database = null;
+    private $lastStatement = null;
 
     private function _makeQuery($login, $statement) {
-        return $this->database->query($statement);
+        if(!is_null($this->lastStatement)) {
+            $this->lastStatement->closeCursor();
+        }
+        $this->lastStatement = $this->database->query($statement);
+        return $this->lastStatement;
     }
 
     private function _makeExec($login, $statement) {
@@ -103,10 +108,10 @@ class DataBaseWorker {
             // TODO: Добавить прочие поля.
             $ordNum = time();
             $values = "'$userId', '$ordNum'";
-            $this->database->exec("INSERT INTO Orders (Acc_Index, Ord_Number) VALUES ($values)");
+            $statement = $this->database->exec("INSERT INTO Orders (Acc_Index, Ord_Number) VALUES ($values)");
 
             // Индекс занесенного заказа.
-            $info = $this->database->query("SELECT MAX(Ord_Index) FROM Orders");
+            $info = $this->_makeQuery("","SELECT MAX(Ord_Index) FROM Orders");
             $ind = $info->fetchAll()[0]['MAX(Ord_Index)'];
             
             foreach($order->ItemList as $item) {
@@ -131,7 +136,7 @@ class DataBaseWorker {
     public function checkUser($login, $pwd) {
         $slogin = htmlspecialchars($login);
         $spwd = htmlspecialchars($pwd);
-        $info = $this->database->query("CALL CHECK_USER('$slogin', '$spwd')");
+        $info = $this->_makeQuery("","CALL CHECK_USER('$slogin', '$spwd')");
         return $info->rowCount() > 0;
     }
 
@@ -151,7 +156,7 @@ class DataBaseWorker {
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
       
-        $this->database->exec("CALL CLEAR_CART($id)");
+        $statement = $this->database->exec("CALL CLEAR_CART($id)");
     }
     
     // Возвращает массив Item-ов.
@@ -168,7 +173,7 @@ class DataBaseWorker {
             $category = $ssearchQuery->CategoryIndex;
         }
         
-        $info = $this->database->query("CALL FIND_ITEMS($category,'$ssearchQuery->Contains')");
+        $info = $this->_makeQuery("","CALL FIND_ITEMS($category,'$ssearchQuery->Contains')");
         $arr = $info->fetchAll();
         
         foreach($arr as $itemArr) {
@@ -179,7 +184,7 @@ class DataBaseWorker {
 
     public function findUser($login) {
         $slogin = htmlspecialchars($login);
-        $info = $this->database->query("CALL FIND_USER('$slogin')");
+        $info = $this->_makeQuery("","CALL FIND_USER('$slogin')");
 
         if ($info->rowCount() > 0) {
             return $info->fetchAll()[0]['Acc_Index'];
@@ -191,7 +196,7 @@ class DataBaseWorker {
     public function getCart($login) {
         // TODO: Учитывать количество.
         $slogin = htmlspecialchars($login);
-        $info = $this->database->query("CALL GET_CART('$slogin')");
+        $info = $this->_makeQuery("","CALL GET_CART('$slogin')");
         
         $items = array();
         $arr = $info->fetchAll();
@@ -205,7 +210,7 @@ class DataBaseWorker {
 
     // Возвращает массив имен категорий.
     public function getCategories() {
-        $info = $this->database->query("CALL GET_CATEGORIES()");
+        $info = $this->_makeQuery("","CALL GET_CATEGORIES()");
         
         for ($i = 0; $i < $info->rowCount(); $i++) {
             $result[] = $info->fetchColumn();
@@ -216,7 +221,7 @@ class DataBaseWorker {
     public function getItem($id) {
         $sid = htmlspecialchars($id);
         
-        $info = $this->database->query("CALL GET_ITEM($sid)");
+        $info = $this->_makeQuery("","CALL GET_ITEM($sid)");
         $itemArr = $info->fetchAll()[0];
         return new Item($itemArr);
         
@@ -224,13 +229,13 @@ class DataBaseWorker {
 
     public function getOrder($num) {
         $snum = htmlspecialchars($num);
-        $info = $this->database->query("CALL GET_ORDER($num)");
+        $info = $this->_makeQuery("","CALL GET_ORDER($num)");
         //print_r($info);
         
         $order = new Order();
         $order->Number = $snum;
         $order->ItemList = array();
-        
+
         $tmp = $info->fetchAll();
         foreach ($tmp as $item) {
             $order->ItemList[] = $this->getItem($item['Goods_Index']);
@@ -241,7 +246,7 @@ class DataBaseWorker {
     public function getOrders($login) {
         $slogin = htmlspecialchars($login);
         $id = $this->findUser($slogin);
-        $info = $this->database->query("CALL GET_ORDERS($id)");
+        $info = $this->_makeQuery("","CALL GET_ORDERS($id)");
         
         $orders = array();
         $tmp = $info->fetchAll();
@@ -254,7 +259,7 @@ class DataBaseWorker {
     }
 
     public function getAllOrders() {
-        $query = $this->database->query("SELECT Ord_Number FROM Orders");
+        $query = $this->_makeQuery("","SELECT Ord_Number FROM Orders");
         $info = $query->fetchAll();
         
         $orders = array();
@@ -268,12 +273,13 @@ class DataBaseWorker {
         $s_login = htmlspecialchars($login);
         $id = $this->findUser($s_login);
         
-        $query = $this->database->query("CALL GET_USER_INFO($id)");
+        $query = $this->_makeQuery($s_login,"CALL GET_USER_INFO($id)");
         $info = $query->fetchAll();
+        $query->closeCursor();
         
         $userInfo = new UserInfo($info[0]);
         
-        $query = $this->_makeQuery($s_login, "CALL GET_USER_ADDRESS($id)");
+        $query = $this->_makeQuery($s_login,"CALL GET_USER_ADDRESS($id)");
         $info = $query->fetchAll()[0];
         
         $a = new Address();
